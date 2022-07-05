@@ -1,4 +1,4 @@
-function accuracy = crossvalidate(filelist , classifier_type)
+function accuracy = performance_analysis(filelist , classifier_type, channels)
 %
 % crossvalidate(filelist)
 %
@@ -15,25 +15,20 @@ function accuracy = crossvalidate(filelist , classifier_type)
 
 %% do the crossvalidation
 n_correct = zeros(length(filelist),15);
+n_test = zeros(length(filelist),15);
+
 for i = 1:length(filelist)
     trainingfiles = filelist;
     trainingfiles(i) = [];
-    
+
     if(strcmp(classifier_type,'bayes_lda'))
-        
-         [n_correct(i,:),n_test(i,:)] = testclassification(trainingfiles,filelist{i});
-        
+        [n_correct(i,:),n_test(i,:)] = testclassification(trainingfiles,filelist{i}, channels);
     elseif strcmp(classifier_type,'svm')
-        
-        n_correct(i,:) = testclassification_svm(trainingfiles,filelist{i});
-        
+        [n_correct(i,:),n_test(i,:)] = testclassification_svm(trainingfiles,filelist{i}, channels);
     elseif strcmp(classifier_type,'lasso_glm')
-        
-        n_correct(i,:) = testclassification_lassoGLM(trainingfiles,filelist{i});
-          
-        
+        [n_correct(i,:),n_test(i,:)] = testclassification_lassoGLM(trainingfiles,filelist{i}, channels);
     end
-    
+
 end
 
 

@@ -16,20 +16,6 @@ function [n_correct, n_test] = testclassification_svm(trainingfiles, testfile)
 % Copyright: Ulrich Hoffmann - EPFL
 
 
-%% subsets of electrodes
-% Fz, Cz, Pz, Oz
-% channels = [31 32 13 16];
-
-% Fz, Cz, Pz, Oz, P7, P3, P4, P8
-channels = [31 32 13 16 11 12 19 20];
-
-% Fz, Cz, Pz, Oz, P7, P3, P4, P8, O1, O2, C3, C4, FC1, FC2, CP1, CP2
-% channels = [31 32 13 16 11 12 19 20 15 17 8 23 5 26 9 22];
-
-% All electrodes
-% channels = [1:32];
-
-
 %% load training files and concatenate data and labels into two big arrays
 x = [];
 y = [];
