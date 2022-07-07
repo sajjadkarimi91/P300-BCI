@@ -1,4 +1,4 @@
-function accuracy = performance_analysis(filelist , classifier_type, channels)
+function accuracy = classifiers_analysis(filelist , classifier_type, channels)
 %
 %
 % Uses n - 1 of the n files in *filelist* to build a classifier and tests the
@@ -19,11 +19,13 @@ for i = 1:length(filelist)
     trainingfiles(i) = [];
 
     if(strcmp(classifier_type,'bayes_lda'))
-        [n_correct(i,:),n_test(i,:)] = bayslda_method(trainingfiles,filelist{i}, channels);
+        [n_correct(i,:),n_test(i,:)] = method_bayslda(trainingfiles,filelist{i}, channels);
     elseif strcmp(classifier_type,'svm')
-        [n_correct(i,:),n_test(i,:)] = svm_method(trainingfiles,filelist{i}, channels);
+        [n_correct(i,:),n_test(i,:)] = method_svm(trainingfiles,filelist{i}, channels);
     elseif strcmp(classifier_type,'lasso_glm')
-        [n_correct(i,:),n_test(i,:)] = lassoglm_method(trainingfiles,filelist{i}, channels);
+        [n_correct(i,:),n_test(i,:)] = method_lassoglm(trainingfiles,filelist{i}, channels);
+    elseif strcmp(classifier_type,'deep_cnn')
+        [n_correct(i,:),n_test(i,:)] = method_deep_cnn(trainingfiles,filelist{i}, channels);
     end
 
 end

@@ -13,10 +13,10 @@ preprocess_flag = 0; % 0 for skiping preprocessesing & epoching step
 % https://www.epfl.ch/labs/mmspg/research/page-58317-en-html/bci-2/bci_datasets/
 
 % Fz, Cz, Pz, Oz
-% channels = [31 32 13 16];
+channels = [31 32 13 16];
 
 % Fz, Cz, Pz, Oz, P7, P3, P4, P8
-channels = [31 32 13 16 11 12 19 20];
+% channels = [31 32 13 16 11 12 19 20];
 
 % Fz, Cz, Pz, Oz, P7, P3, P4, P8, O1, O2, C3, C4, FC1, FC2, CP1, CP2
 % channels = [31 32 13 16 11 12 19 20 15 17 8 23 5 26 9 22];
@@ -50,7 +50,7 @@ end
 %% Classifying data
 
 % classifier_type = {'bayes_lda' , 'svm' , 'lasso_glm'};
-classifier_type = {'bayes_lda' };
+classifier_type = {'deep_cnn','bayes_lda' };
 
 
 for i= 1:length(sub_numbers)
@@ -64,9 +64,13 @@ for i= 1:length(sub_numbers)
     all_subjects_path{i}=subjec_path;
 
     for j=1:length(classifier_type)
-        [acc(i,j).vals] = performance_analysis( all_subjects_path{i} , classifier_type{j}, channels);
+        [acc(i,j).vals] = classifiers_analysis( all_subjects_path{i} , classifier_type{j}, channels);
     end
 
+    plot(acc(i,1).vals,'b')
+    hold on
+    plot(acc(i,2).vals,'r')
+    pause(0.5)
 end
 
 %% plot the results
@@ -74,15 +78,11 @@ end
 close all
 
 for i= 1:length(sub_numbers)
-
-    subplot(3,2,i)
-    plot(acc(i).vals)
+    hold off
+    plot(acc(i,1).vals,'b')
     hold on
+    plot(acc(i,2).vals,'r')
+    pause(0.1)
 
-    subplot(3,2,i)
-    plot(acc(i).vals)
-    hold on
-
-    pause(0.05)
 end
 

@@ -1,4 +1,4 @@
-function [n_correct, n_test] = bayslda_method(trainingfiles, testfile, channels)
+function [n_correct, n_test] = method_bayslda(trainingfiles, testfile, channels)
 %
 % bayslda_method(trainingfiles, testfile, channels)
 % 

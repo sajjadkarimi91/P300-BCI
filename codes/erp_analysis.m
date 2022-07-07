@@ -1,4 +1,4 @@
-function [p300_event, non_p300_event] = erp_analysis(trainingfiles, channels)
+function [p300_event, non_p300_event, p300_epoches, nonp300_epoches] = erp_analysis(trainingfiles, channels)
 %
 % p300_pattern(trainingfiles, testfile, channels)
 %
@@ -31,14 +31,15 @@ end
 %% select channels, windsorize, normalize, bayesian lda
 x = x(channels,:,:);
 w = windsor;
-w = train(w,x,0.05);
+w = train(w,x,0.15);
 x = apply(w,x);
 
 % n = normalize;
 % n = train(n,x,'z-score');
 % x = apply(n,x);
 
-
+p300_epoches     = x(:,:,y==1);
+nonp300_epoches     = x(:,:,y==-1);
 p300_event     = mean(x(:,:,y==1),3);
 non_p300_event = mean(x(:,:,y==-1),3);
 

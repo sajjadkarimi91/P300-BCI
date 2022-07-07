@@ -1,6 +1,6 @@
-function [n_correct, n_test] = lassoglm_method(trainingfiles, testfile, channels)
+function [n_correct, n_test] = method_svm(trainingfiles, testfile, channels)
 %
-% testclassification(trainingfiles, testfile, channels)
+% svm_method(trainingfiles, testfile, channels)
 %
 % Uses the data in *trainingfiles* to build a classifier and tests
 % the classifier on the data in *testfile*. *n_correct* contains for each
@@ -12,7 +12,6 @@ function [n_correct, n_test] = lassoglm_method(trainingfiles, testfile, channels
 
 % Author: Ulrich Hoffmann - EPFL, 2006
 % Copyright: Ulrich Hoffmann - EPFL
-
 
 
 %% load training files and concatenate data and labels into two big arrays
@@ -46,13 +45,12 @@ x = reshape(x,n_samples*n_channels,n_trials);
 wieghts_train = ones(size(y,1),size(y,2));
 wieghts_train(y==1)=sum(y==-1)/length(y);
 wieghts_train(y==-1)=sum(y==1)/length(y);
-y=y>0;
-[B,FitInfo] = lassoglm(x',y(:),'binomial','Weights', wieghts_train(:),...
-    'NumLambda',25,'CV',10);
 
-b_glm = B(:,FitInfo.Index1SE);
-cnst = FitInfo.Intercept(FitInfo.Index1SE);
-B1 = [cnst;b_glm];
+c = cvpartition(n_trials,'KFold',10);
+opts = struct('Optimizer','bayesopt','ShowPlots',true,'CVPartition',c,...
+    'AcquisitionFunctionName','expected-improvement-plus');
+svmmod = fitcsvm(x',y,'Weights', wieghts_train(:),'KernelFunction','rbf',...
+    'OptimizeHyperparameters','auto','HyperparameterOptimizationOptions',opts);
 
 
 %% load testfile and do classification
@@ -68,30 +66,32 @@ for i = 1:n_runs
     x = apply(n,x);
     n_trials = size(x,3);
     x = reshape(x,n_channels*n_samples,n_trials);
-    preds = glmval(B1,x','logit');
-    y = preds';
+    [~,y_two_class] = predict(svmmod,x');
+    y = y_two_class(:,2)';
     scores = zeros(1,6);
-
-    for j = 1:n_blocks
-        for strt_0 = 1 : min(n_blocks , floor(n_trials/6) - n_blocks)
+    for j = 1:n_blocks        
+        for strt_0 = 1 : min(n_blocks , floor(n_trials/6) - n_blocks)            
             for s = strt_0:floor(n_trials/6)
-
+                                
                 start = (s-1)*6+1;
                 stop  = (s)*6;
-                stimulussequence = f.runs{i}.stimuli(start:stop);
+                stimulussequence = f.runs{i}.stimuli(start:stop);                
                 scores(stimulussequence) = scores(stimulussequence) + ...
                     y(start:stop);
-
+                
                 if(rem(s-strt_0+1,j)==0)
-                    n_test(j) = n_test(j)+1;
+                                       
+                    n_test(j) = n_test(j)+1;                    
                     [~,idx] = max(scores);
                     if (idx == f.runs{i}.target)
                         n_correct(j) = n_correct(j)+1;
-                    end
-                    scores = zeros(1,6);
-                end
+                    end                    
+                    scores = zeros(1,6);                    
+                end    
 
-            end
-        end
+            end            
+        end        
     end
+    
 end
+

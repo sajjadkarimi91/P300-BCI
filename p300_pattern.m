@@ -6,25 +6,19 @@ addpath(genpath(pwd))
 %% common setting
 
 new_sampling_rate = 128;
-sub_numbers =[1,3,6,7];
+sub_numbers =[3,7];
 
 %% subsets of electrodes for classification
 % https://www.epfl.ch/labs/mmspg/research/page-58317-en-html/bci-2/bci_datasets/
 
-% Fz, Cz, Pz, Oz
-% channels = [31 32 13 16];
 
-% Fz, Cz, Pz, Oz, P7, P3, P4, P8
-channels = [31 32 13 16 11 12 19 20];
+% Best channels for P300 are  Cz, Pz,C3, C4, CP1, CP2
+channels =                   [32  13  8  23   9    22];
 
-% Fz, Cz, Pz, Oz, P7, P3, P4, P8, O1, O2, C3, C4, FC1, FC2, CP1, CP2
-% channels = [31 32 13 16 11 12 19 20 15 17 8 23 5 26 9 22];
-
-% All electrodes
-% channels = [1:32];
-
-% Cz, Pz,C3, C4, CP1, CP2
-channels = [32 13 8 23 9 22];
+channel_names = {'Cz'; 'Pz';'C3'; 'C4'; 'CP1'; 'CP2'};
+for ch = 1:length(channel_names)
+    chanlocs(ch).labels = channel_names{ch};
+end
 
 %% EEG epoching & preprocessing
 
@@ -40,31 +34,31 @@ for i= 1:length(sub_numbers)
         extract_trials_p300(load_path,save_path, new_sampling_rate);
         subjec_path{1,j}=save_path;
     end
-    [p300_event, non_p300_event] = erp_analysis(subjec_path, channels);
+    [p300_event, non_p300_event, p300_epoches, nonp300_epoches] = erp_analysis(subjec_path, channels);
 
-    figure
-    plot(linspace(-100,900,new_sampling_rate), p300_event')
-    hold on
-    plot(linspace(-100,900,new_sampling_rate), non_p300_event','r')
-    grid on
+    %     epochs_temp = squeeze(p300_epoches(1,:,:));
+    %     epochs_p300 = cell(1,size(epochs_temp,2));
+    %     for e = 1:length(epochs_p300)
+    % epochs_p300{1}
+    %     end
+    epochs{1}{1}.data = p300_epoches;
+    epochs{1}{1}.chanlocs = chanlocs;
+    epochs{1}{1}.srate = new_sampling_rate;
+    epochs{1}{1}.xmin = -0.1;
+    epochs{1}{1}.xmax = 0.9-1/new_sampling_rate;
+
+    epochs{2}{1}.data = nonp300_epoches;
+    epochs{2}{1}.chanlocs = chanlocs;
+    epochs{2}{1}.srate = new_sampling_rate;
+    epochs{2}{1}.xmin = -0.1;
+    epochs{2}{1}.xmax = 0.9-1/new_sampling_rate;
+
+    for ch = 1:length(channel_names)
+        plot_erp(epochs, channel_names{ch}, 'plotstd', 'fill', 'labels',{'P300','Baseline'});
+    end
+
+
 
 end
 
-
-%% plot the results
-
-close all
-
-for i= 1:length(sub_numbers)
-
-    subplot(3,2,i)
-    plot(acc(i).vals)
-    hold on
-
-    subplot(3,2,i)
-    plot(acc(i).vals)
-    hold on
-
-    pause(0.05)
-end
 

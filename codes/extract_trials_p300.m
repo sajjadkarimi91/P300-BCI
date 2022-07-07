@@ -58,7 +58,7 @@ for i = 1:length(filelist)
     end
     f.data = f.data(:,1:decimation:end);
 %     sjk_eeg_plot(f.data(:,1:100000), srate);
-    f.data = sjk_eeg_filter(f.data,new_sampling_rate,1,8);
+    f.data = sjk_eeg_filter(f.data,new_sampling_rate,1,10);
 %     sjk_eeg_plot(f.data2(:,1:100000), srate);
     % downsample the data (from 2048 Hz to 64 Hz)
     
