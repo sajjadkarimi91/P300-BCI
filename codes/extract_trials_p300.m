@@ -1,4 +1,4 @@
-function extracttrials(indir, outfile, new_sampling_rate)
+function extract_trials_p300(indir, outfile, new_sampling_rate)
 %
 % extracttrials(indir, outfile)
 %
@@ -28,7 +28,7 @@ runs = cell(1,length(filelist));
 srate = 2048;                      % sampling rate of raw data in Hz
 reference = [7 24]; %1:32;         % indices of channels used as reference
 filterorder = 3;
-filtercutoff = [1/1024 12/1024];
+filtercutoff = [0.5/1024 20/1024];
 [f_b, f_a] = butter(filterorder,filtercutoff);
 decimation = round(srate/new_sampling_rate);  % downsampling factor
 n_samples  = round(new_sampling_rate);        % number of (temporal) samples in a trial
@@ -53,12 +53,15 @@ for i = 1:length(filelist)
     n_channels = size(f.data,1);
 
     % bandpass filter the data (with a forward-backward filter)
-    for j = 1:n_channels
+    for j = 1:n_channels        
         f.data(j,:) = filtfilt(f_b,f_a,f.data(j,:));
     end
-
-    % downsample the data (from 2048 Hz to 64 Hz)
     f.data = f.data(:,1:decimation:end);
+%     sjk_eeg_plot(f.data(:,1:100000), srate);
+    f.data = sjk_eeg_filter(f.data,new_sampling_rate,1,8);
+%     sjk_eeg_plot(f.data2(:,1:100000), srate);
+    % downsample the data (from 2048 Hz to 64 Hz)
+    
 
     % extract trials
     % compute class labels
@@ -68,7 +71,7 @@ for i = 1:length(filelist)
     for j = 1:n_trials
         pos = round(etime(f.events(j,:), ...
             f.events(1,:))*(srate/decimation) ...
-            + 1 + 0.4*srate/decimation) ;
+            + 1 + 0.3*srate/decimation) ;
         runs{i}.x(:,:,j) = f.data(:,pos:pos+n_samples-1);
     end
     runs{i}.y = zeros(1,n_trials);

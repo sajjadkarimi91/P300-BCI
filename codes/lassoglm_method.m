@@ -1,8 +1,6 @@
-
-
-function [n_correct, n_test] = testclassification_lassoglm(trainingfiles, testfile, channels)
+function [n_correct, n_test] = lassoglm_method(trainingfiles, testfile, channels)
 %
-% testclassification(trainingfiles, testfile)
+% testclassification(trainingfiles, testfile, channels)
 %
 % Uses the data in *trainingfiles* to build a classifier and tests
 % the classifier on the data in *testfile*. *n_correct* contains for each
@@ -20,11 +18,11 @@ function [n_correct, n_test] = testclassification_lassoglm(trainingfiles, testfi
 %% load training files and concatenate data and labels into two big arrays
 x = [];
 y = [];
-for i = 1:length(trainingfiles);
+for i = 1:length(trainingfiles)
     fprintf('loading %s\n',trainingfiles{i});
     f = load(trainingfiles{i});
     n_runs = length(f.runs);
-    for j = 1:n_runs;
+    for j = 1:n_runs
         x = cat(3,x,f.runs{j}.x);
         y = [y f.runs{j}.y];
     end
@@ -43,17 +41,8 @@ x = apply(n,x);
 n_channels = length(channels);
 n_samples = size(x,2);
 n_trials = size(x,3);
-
-% m_x_p300=mean(x(:,:,y==1),3);
-% m_x=mean(x(:,:,y==-1),3);
-%  plot(m_x(1,:))
-% hold on
-% plot(m_x_p300(1,:))
-
 x = reshape(x,n_samples*n_channels,n_trials);
 
-% b = bayeslda(1);
-% b = train(b,x,y);
 wieghts_train = ones(size(y,1),size(y,2));
 wieghts_train(y==1)=sum(y==-1)/length(y);
 wieghts_train(y==-1)=sum(y==1)/length(y);
@@ -64,7 +53,7 @@ y=y>0;
 b_glm = B(:,FitInfo.Index1SE);
 cnst = FitInfo.Intercept(FitInfo.Index1SE);
 B1 = [cnst;b_glm];
-% svmmod = fitcsvm(x',y(:),'Weights', wieghts_train(:));
+
 
 %% load testfile and do classification
 f = load(testfile);
@@ -79,53 +68,30 @@ for i = 1:n_runs
     x = apply(n,x);
     n_trials = size(x,3);
     x = reshape(x,n_channels*n_samples,n_trials);
-    %     y = classify(b,x);
-    %     [~,y_two_class] = predict(svmmod,x');
     preds = glmval(B1,x','logit');
     y = preds';
     scores = zeros(1,6);
+
     for j = 1:n_blocks
-        
         for strt_0 = 1 : min(n_blocks , floor(n_trials/6) - n_blocks)
-            
             for s = strt_0:floor(n_trials/6)
-                
-                
+
                 start = (s-1)*6+1;
                 stop  = (s)*6;
                 stimulussequence = f.runs{i}.stimuli(start:stop);
-                
                 scores(stimulussequence) = scores(stimulussequence) + ...
                     y(start:stop);
-                
+
                 if(rem(s-strt_0+1,j)==0)
-                    
-                    
                     n_test(j) = n_test(j)+1;
-                    
                     [~,idx] = max(scores);
                     if (idx == f.runs{i}.target)
                         n_correct(j) = n_correct(j)+1;
                     end
-                    
                     scores = zeros(1,6);
-                    
                 end
-                
-                
+
             end
-            
         end
-        
     end
-    
-end
-
-
-%% if no output arguments plot the results
-if nargout == 0
-    plot(n_correct);
-    axis([1 20 0 6]);
-    xlabel('Number of blocks');
-    ylabel('Number of correct classifications');
 end

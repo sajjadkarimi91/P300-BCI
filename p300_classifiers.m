@@ -5,10 +5,12 @@ addpath(genpath(pwd))
 
 %% common setting
 
+new_sampling_rate = 32; % from 2048 to 32 Hz
 sub_numbers =[1,3,4,6,7,9];
-preprocess_flag = 1; % 0 for skiping preprocessesing & epoching step
+preprocess_flag = 0; % 0 for skiping preprocessesing & epoching step
 
 %% subsets of electrodes for classification
+% https://www.epfl.ch/labs/mmspg/research/page-58317-en-html/bci-2/bci_datasets/
 
 % Fz, Cz, Pz, Oz
 % channels = [31 32 13 16];
@@ -33,14 +35,13 @@ if preprocess_flag>0
         clear subjec_path
 
         for j=1:4
-
-            load_path = [pwd,'\data_set\subject',num2str(sub_numbers(i)),'\session',num2str(j)];
-            save_path = [pwd,'\data_set\subject',num2str(sub_numbers(i)),'\s',num2str(j)];
-            extracttrials(load_path,save_path);
+            load_path = [pwd,'\dataset\subject',num2str(sub_numbers(i)),'\session',num2str(j)];
+            save_path = [pwd,'\dataset\subject',num2str(sub_numbers(i)),'\s',num2str(j),'.mat'];
+            extracttrials(load_path,save_path, new_sampling_rate);
             subjec_path{1,j}=save_path;
         end
 
-        all_subjects{i}=subjec_path;
+        all_subjects_path{i}=subjec_path;
 
     end
 
@@ -49,34 +50,22 @@ end
 %% Classifying data
 
 % classifier_type = {'bayes_lda' , 'svm' , 'lasso_glm'};
-classifier_type = {'bayes_lda', 'svm' };
+classifier_type = {'bayes_lda' };
 
 
 for i= 1:length(sub_numbers)
 
     for j=1:4
-
-        load_path = [pwd,'\subject',num2str(sub_numbers(i)),'\session',num2str(j)];
-
-        save_path = [pwd,'\subject',num2str(sub_numbers(i)),'\s',num2str(j)];
+        load_path = [pwd,'\dataset\subject',num2str(sub_numbers(i)),'\session',num2str(j)];
+        save_path = [pwd,'\dataset\subject',num2str(sub_numbers(i)),'\s',num2str(j),'.mat'];
         subjec_path{1,j}=save_path;
-
     end
 
-    all_subjects{i} = subjec_path;
+    all_subjects_path{i}=subjec_path;
 
     for j=1:length(classifier_type)
-        [acc(i).vals] = crossvalidate( all_subjects{i} , classifier_type{j}, channels);
+        [acc(i,j).vals] = performance_analysis( all_subjects_path{i} , classifier_type{j}, channels);
     end
-
-
-
-    subplot(3,2,i)
-    plot((acc_bayes_lda(i).x))
-    hold on
-    plot((acc_svm(i).x))
-
-    pause(0.05)
 
 end
 
@@ -87,8 +76,13 @@ close all
 for i= 1:length(sub_numbers)
 
     subplot(3,2,i)
-    plot((acc_bayes_lda(i).x))
+    plot(acc(i).vals)
     hold on
 
+    subplot(3,2,i)
+    plot(acc(i).vals)
+    hold on
+
+    pause(0.05)
 end
 

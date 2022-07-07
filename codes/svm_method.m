@@ -1,7 +1,7 @@
-function [n_correct, n_test] = testclassification_bayslda(trainingfiles, testfile, channels)
+function [n_correct, n_test] = svm_method(trainingfiles, testfile)
 %
-% testclassification(trainingfiles, testfile)
-% 
+% svm_method(trainingfiles, testfile, channels)
+%
 % Uses the data in *trainingfiles* to build a classifier and tests
 % the classifier on the data in *testfile*. *n_correct* contains for each
 % number of blocks (1-20) the number of correctly classified items. If no
@@ -14,12 +14,11 @@ function [n_correct, n_test] = testclassification_bayslda(trainingfiles, testfil
 % Copyright: Ulrich Hoffmann - EPFL
 
 
-
 %% load training files and concatenate data and labels into two big arrays
 x = [];
 y = [];
 for i = 1:length(trainingfiles);
-    %fprintf('loading %s\n',trainingfiles{i});
+    fprintf('loading %s\n',trainingfiles{i});
     f = load(trainingfiles{i});
     n_runs = length(f.runs);
     for j = 1:n_runs;
@@ -29,7 +28,7 @@ for i = 1:length(trainingfiles);
 end
 
 
-%% select channels, windsorize, normalize, bayesian lda  
+%% select channels, windsorize, normalize, bayesian lda
 x = x(channels,:,:);
 w = windsor;
 w = train(w,x,0.1);
@@ -43,16 +42,22 @@ n_samples = size(x,2);
 n_trials = size(x,3);
 x = reshape(x,n_samples*n_channels,n_trials);
 
-b = bayeslda(1);
-b = train(b,x,y);
+wieghts_train = ones(size(y,1),size(y,2));
+wieghts_train(y==1)=sum(y==-1)/length(y);
+wieghts_train(y==-1)=sum(y==1)/length(y);
+
+c = cvpartition(n_trials,'KFold',10);
+opts = struct('Optimizer','bayesopt','ShowPlots',true,'CVPartition',c,...
+    'AcquisitionFunctionName','expected-improvement-plus');
+svmmod = fitcsvm(x',y,'Weights', wieghts_train(:),'KernelFunction','rbf',...
+    'OptimizeHyperparameters','auto','HyperparameterOptimizationOptions',opts);
 
 
 %% load testfile and do classification
 f = load(testfile);
 n_runs = length(f.runs);
-n_blocks = 15;
+n_blocks = 20;
 n_correct = zeros(1,n_blocks);
-n_test = zeros(1,n_blocks);
 
 for i = 1:n_runs
     x = f.runs{i}.x(channels,:,:);
@@ -60,51 +65,32 @@ for i = 1:n_runs
     x = apply(n,x);
     n_trials = size(x,3);
     x = reshape(x,n_channels*n_samples,n_trials);
-    y = classify(b,x);
+    [~,y_two_class] = predict(svmmod,x');
+    y = y_two_class(:,2)';
     scores = zeros(1,6);
-   
-    for j = 1:n_blocks
-        
-        for strt_0 = 1 : min(n_blocks , floor(n_trials/6) - n_blocks)
-            
+    for j = 1:n_blocks        
+        for strt_0 = 1 : min(n_blocks , floor(n_trials/6) - n_blocks)            
             for s = strt_0:floor(n_trials/6)
-                
-                
+                                
                 start = (s-1)*6+1;
                 stop  = (s)*6;
-                stimulussequence = f.runs{i}.stimuli(start:stop);
-                
+                stimulussequence = f.runs{i}.stimuli(start:stop);                
                 scores(stimulussequence) = scores(stimulussequence) + ...
                     y(start:stop);
                 
                 if(rem(s-strt_0+1,j)==0)
-                    
-                    
-                    n_test(j) = n_test(j)+1;
-                    
+                                       
+                    n_test(j) = n_test(j)+1;                    
                     [~,idx] = max(scores);
                     if (idx == f.runs{i}.target)
                         n_correct(j) = n_correct(j)+1;
-                    end
-                    
-                    scores = zeros(1,6);
-                    
-                end
-                
-                
-            end
-            
-        end
-        
+                    end                    
+                    scores = zeros(1,6);                    
+                end    
+
+            end            
+        end        
     end
     
 end
 
-
-%% if no output arguments plot the results
-if nargout == 0
-    plot(n_correct);
-    axis([1 15 0 6]);
-    xlabel('Number of blocks');
-    ylabel('Number of correct classifications');
-end
