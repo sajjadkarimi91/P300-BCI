@@ -31,4 +31,4 @@ The implemented methodes include:
 ## Usage:
 Run "p300_pattern.m" to analyze the P300 ERP over baseline events.
 
-Run "p300_classifiers.m" to have a P300-BCI system with different classifiers and performances.
+Run "p300_classifiers.m" to check P300-BCI systems with different classifiers and performances.
