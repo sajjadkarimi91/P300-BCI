@@ -11,7 +11,7 @@ An efficient P300-based brain-computer interface for disabled subjects
 
 This package includes the prototype MATLAB codes for P300-based brain-computer interfaces.
 
-The implemented methodes include: 
+The implemented methods include: 
 
   1. Bayesian linear discriminant analysis (Bayes-LDA)
   2. Support-vector machines (SVMs)       
