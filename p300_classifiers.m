@@ -51,7 +51,7 @@ end
 %% Classifying data
 
 % classifier_type = {'bayes_lda' , 'svm' , 'lasso_glm','deep_cnn'};
-classifier_type = {'bayes_lda' , 'svm' ,'deep_cnn'};
+classifier_type = {'bayes_lda' };
 
 
 for i= 1:length(sub_numbers)
@@ -73,7 +73,7 @@ for i= 1:length(sub_numbers)
     pause(0.5)
 end
 
-%% plot the results
+% plot the results
 
 close all
 
@@ -88,7 +88,51 @@ for i= 1:length(sub_numbers)
     xlabel('trail number')
     legend(classifier_type,'Location','best')
     title(['subject: ',num2str(sub_numbers(i))])
-    pause()
+
+end
+
+
+%% Classifying data
+
+% classifier_type = {'bayes_lda' , 'svm' , 'lasso_glm','deep_cnn'};
+classifier_type = {'bayes_lda' };
+channels_cell = {[31 32 13 16],[31 32 13 16 11 12 19 20],[31 32 13 16 11 12 19 20 15 17 8 23 5 26 9 22],1:32};
+channels_cell_name = {'4-channel','8-channel','16-channel','32-channel'};
+
+for i= 1:length(sub_numbers)
+    clc
+    sub_numbers(i)
+    for j=1:4
+        load_path = [dataset_dir,'\subject',num2str(sub_numbers(i)),'\session',num2str(j)];
+        save_path = [dataset_dir,'\subject',num2str(sub_numbers(i)),'\s',num2str(j),'.mat'];
+        subjec_path{1,j}=save_path;
+    end
+
+    all_subjects_path{i}=subjec_path;
+
+    for j=1:length(channels_cell)
+        [acc(i,j).vals] = classifiers_analysis( all_subjects_path{i} , classifier_type{1}, channels_cell{j});
+    end
+
+    plot(acc(i,1).vals,'b')
+    pause(0.5)
+end
+
+% plot the results
+
+close all
+
+for i= 1:length(sub_numbers)
+    figure
+    for j=1:length(channels_cell)
+        plot(acc(i,j).vals,'linewidth',1.5)
+        hold on
+        grid on
+    end
+    ylabel('ACC')
+    xlabel('trail number')
+    legend(channels_cell_name,'Location','best')
+    title(['subject: ',num2str(sub_numbers(i))])
 
 end
 

@@ -47,8 +47,8 @@ wieghts_train(y==1)=sum(y==-1)/length(y);
 wieghts_train(y==-1)=sum(y==1)/length(y);
 
 c = cvpartition(n_trials,'KFold',10);
-opts = struct('Optimizer','bayesopt','ShowPlots',true,'CVPartition',c,...
-    'AcquisitionFunctionName','expected-improvement-plus','MaxTime',25);
+opts = struct('Optimizer','bayesopt','ShowPlots',false,'CVPartition',c,...
+    'AcquisitionFunctionName','expected-improvement-plus','MaxTime',50);
 svmmod = fitcsvm(x',y,'Weights', wieghts_train(:),'KernelFunction','rbf',...
     'OptimizeHyperparameters','auto','HyperparameterOptimizationOptions',opts);
 
