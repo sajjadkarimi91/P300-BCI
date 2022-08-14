@@ -36,11 +36,7 @@ for i= 1:length(sub_numbers)
     end
     [p300_event, non_p300_event, p300_epoches, nonp300_epoches] = erp_analysis(subjec_path, channels);
 
-    %     epochs_temp = squeeze(p300_epoches(1,:,:));
-    %     epochs_p300 = cell(1,size(epochs_temp,2));
-    %     for e = 1:length(epochs_p300)
-    % epochs_p300{1}
-    %     end
+
     epochs{1}{1}.data = p300_epoches;
     epochs{1}{1}.chanlocs = chanlocs;
     epochs{1}{1}.srate = new_sampling_rate;
@@ -57,7 +53,7 @@ for i= 1:length(sub_numbers)
         plot_erp(epochs, channel_names{ch}, 'plotstd', 'fill', 'labels',{'P300','Baseline'});
     end
 
-
+    pause()
 
 end
 

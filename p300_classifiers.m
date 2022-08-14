@@ -6,8 +6,10 @@ addpath(genpath(pwd))
 %% common setting
 
 new_sampling_rate = 32; % from 2048 to 32 Hz
-sub_numbers =[1,3,4,6,7,9];
+sub_numbers = [3,4] ;%[1,3,4,6,7,9];
 preprocess_flag = 0; % 0 for skiping preprocessesing & epoching step
+
+dataset_dir = [pwd,'\dataset'];
 
 %% subsets of electrodes for classification
 % https://www.epfl.ch/labs/mmspg/research/page-58317-en-html/bci-2/bci_datasets/
@@ -26,7 +28,6 @@ channels = [31 32 13 16];
 
 %% EEG epoching & preprocessing
 
-
 if preprocess_flag>0
     for i= 1:length(sub_numbers)
 
@@ -35,8 +36,8 @@ if preprocess_flag>0
         clear subjec_path
 
         for j=1:4
-            load_path = [pwd,'\dataset\subject',num2str(sub_numbers(i)),'\session',num2str(j)];
-            save_path = [pwd,'\dataset\subject',num2str(sub_numbers(i)),'\s',num2str(j),'.mat'];
+            load_path = [dataset_dir,'\subject',num2str(sub_numbers(i)),'\session',num2str(j)];
+            save_path = [dataset_dir,'\subject',num2str(sub_numbers(i)),'\s',num2str(j),'.mat'];
             extracttrials(load_path,save_path, new_sampling_rate);
             subjec_path{1,j}=save_path;
         end
@@ -49,15 +50,16 @@ end
 
 %% Classifying data
 
-% classifier_type = {'bayes_lda' , 'svm' , 'lasso_glm'};
-classifier_type = {'deep_cnn','bayes_lda' };
+% classifier_type = {'bayes_lda' , 'svm' , 'lasso_glm','deep_cnn'};
+classifier_type = {'bayes_lda' , 'svm' ,'deep_cnn'};
 
 
 for i= 1:length(sub_numbers)
-
+    clc
+    sub_numbers(i)
     for j=1:4
-        load_path = [pwd,'\dataset\subject',num2str(sub_numbers(i)),'\session',num2str(j)];
-        save_path = [pwd,'\dataset\subject',num2str(sub_numbers(i)),'\s',num2str(j),'.mat'];
+        load_path = [dataset_dir,'\subject',num2str(sub_numbers(i)),'\session',num2str(j)];
+        save_path = [dataset_dir,'\subject',num2str(sub_numbers(i)),'\s',num2str(j),'.mat'];
         subjec_path{1,j}=save_path;
     end
 
@@ -68,8 +70,6 @@ for i= 1:length(sub_numbers)
     end
 
     plot(acc(i,1).vals,'b')
-    hold on
-    plot(acc(i,2).vals,'r')
     pause(0.5)
 end
 
@@ -78,11 +78,17 @@ end
 close all
 
 for i= 1:length(sub_numbers)
-    hold off
-    plot(acc(i,1).vals,'b')
-    hold on
-    plot(acc(i,2).vals,'r')
-    pause(0.1)
+    figure
+    for j=1:length(classifier_type)
+        plot(acc(i,j).vals,'linewidth',1.5)
+        hold on
+        grid on
+    end
+    ylabel('ACC')
+    xlabel('trail number')
+    legend(classifier_type,'Location','best')
+    title(['subject: ',num2str(sub_numbers(i))])
+    pause()
 
 end
 
