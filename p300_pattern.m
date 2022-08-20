@@ -6,7 +6,7 @@ addpath(genpath(pwd))
 %% common setting
 
 new_sampling_rate = 128;
-sub_numbers =[3,7];
+sub_numbers =[3];
 
 %% subsets of electrodes for classification
 % https://www.epfl.ch/labs/mmspg/research/page-58317-en-html/bci-2/bci_datasets/
