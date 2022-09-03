@@ -7,7 +7,7 @@ addpath(genpath(pwd))
 
 new_sampling_rate = 32; % from 2048 to 32 Hz
 sub_numbers = [3,4] ;%[1,3,4,6,7,9];
-preprocess_flag = 1; % 0 for skiping preprocessesing & epoching step
+preprocess_flag = 1; % 0 for skipping preprocessing & epoching step
 
 dataset_dir = [pwd,'\dataset'];
 
