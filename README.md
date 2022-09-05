@@ -29,6 +29,10 @@ The implemented methods include:
      https://github.com/lrkrol/plot_erp
 
 ## Usage:
+It is recommended that you create a /dataset folder for the EPFL dataset without any new and extra codes like the below image.
+
 Run "p300_pattern.m" to analyze the P300 ERP over baseline events.
 
 Run "p300_classifiers.m" to check P300-BCI systems with different classifiers and performances.
+
+![image](https://user-images.githubusercontent.com/50092872/188487693-35cb5ff7-fae1-4b26-8bb0-de76f28ca27a.png)
