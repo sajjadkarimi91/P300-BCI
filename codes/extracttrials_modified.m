@@ -1,4 +1,4 @@
-function extracttrials(indir, outfile, new_sampling_rate)
+function extracttrials_modified(indir, outfile, new_sampling_rate)
 %
 % extracttrials(indir, outfile)
 %

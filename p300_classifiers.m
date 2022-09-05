@@ -38,7 +38,7 @@ if preprocess_flag>0
         for j=1:4
             load_path = [dataset_dir,'\subject',num2str(sub_numbers(i)),'\session',num2str(j)];
             save_path = [dataset_dir,'\subject',num2str(sub_numbers(i)),'\s',num2str(j),'.mat'];
-            extracttrials(load_path,save_path, new_sampling_rate);
+            extracttrials_modified(load_path,save_path, new_sampling_rate);
             subjec_path{1,j}=save_path;
         end
 
